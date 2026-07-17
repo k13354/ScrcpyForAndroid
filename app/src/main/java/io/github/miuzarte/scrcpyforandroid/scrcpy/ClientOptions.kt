@@ -218,6 +218,11 @@ data class ClientOptions(
 
     // --no-terminal-title
     // var updateTerminalTitle: Boolean = true,
+
+    // UDP 推流配置（不传给 scrcpy server，仅客户端使用）
+    var udpStreamEnabled: Boolean = false,
+    var udpStreamHost: String = "",
+    var udpStreamPort: Int = 0,
 ) {
     enum class KeyInjectMode(val string: String) {
         MIXED("mixed"),

@@ -571,6 +571,83 @@ fun SettingsPage(
         }
 
         item {
+            SectionSmallTitle("UDP 推流 (OBS)")
+            Card {
+                var udpHostInput by rememberSaveable(asBundle.udpStreamHost) {
+                    mutableStateOf(asBundle.udpStreamHost)
+                }
+                var udpPortInput by rememberSaveable(asBundle.udpStreamPort) {
+                    mutableStateOf(asBundle.udpStreamPort.toString())
+                }
+
+                SwitchPreference(
+                    title = "UDP 推流",
+                    summary = "将 scrcpy 画面通过 MPEG-TS over UDP 推送到 OBS（需 OBS 安装 UDP 源插件）",
+                    enabled = !isScrcpyStreaming,
+                    checked = asBundle.udpStreamEnabled,
+                    onCheckedChange = {
+                        if (!isScrcpyStreaming)
+                            asBundle = asBundle.copy(
+                                udpStreamEnabled = it,
+                            )
+                    },
+                )
+
+                AnimatedVisibility(asBundle.udpStreamEnabled) {
+                    Column {
+                        SuperTextField(
+                            title = "目标 IP 地址",
+                            summary = "OBS 所在机器的 IP 地址",
+                            value = udpHostInput,
+                            onValueChange = { udpHostInput = it },
+                            onFocusLost = {
+                                asBundle = asBundle.copy(
+                                    udpStreamHost = udpHostInput.ifBlank { "192.168.1.100" },
+                                )
+                            },
+                            inputFilter = { it },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                        SuperTextField(
+                            title = "目标端口",
+                            summary = "OBS UDP 源监听的端口号",
+                            value = udpPortInput,
+                            onValueChange = { udpPortInput = it },
+                            onFocusLost = {
+                                asBundle = asBundle.copy(
+                                    udpStreamPort = udpPortInput.toIntOrNull()?.coerceIn(1024, 65535) ?: 1234,
+                                )
+                            },
+                            inputFilter = { it.filter(Char::isDigit) },
+                            singleLine = true,
+                            modifier = Modifier.fillMaxWidth(),
+                        )
+                        // 提示信息
+                        androidx.compose.foundation.layout.PaddingValues(
+                            start = UiSpacing.medium,
+                            top = UiSpacing.small,
+                            end = UiSpacing.medium,
+                            bottom = UiSpacing.small,
+                        ).also { padding ->
+                            androidx.compose.foundation.layout.Box(
+                                modifier = Modifier.padding(padding),
+                            ) {
+                                androidx.compose.material3.Text(
+                                    text = "OBS 配置：添加「UDP 源」插件，监听端口填写 ${udpPortInput.ifBlank { "1234" }}，格式选择 MPEG-TS",
+                                    style = androidx.compose.ui.text.TextStyle(
+                                        color = colorScheme.onSurfaceVariant,
+                                        fontSize = androidx.compose.ui.unit.TextUnit.Companion.Sp(11f),
+                                    ),
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        item {
             SectionSmallTitle(stringResource(R.string.section_fullscreen))
             Card {
                 SwitchPreference(

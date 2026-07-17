@@ -305,6 +305,20 @@ class AppSettings(context: Context): Settings(context, "AppSettings") {
             booleanPreferencesKey("hide_device_logs"),
             false,
         )
+
+        // UDP 推流
+        val UDP_STREAM_ENABLED = Pair(
+            booleanPreferencesKey("udp_stream_enabled"),
+            false,
+        )
+        val UDP_STREAM_HOST = Pair(
+            stringPreferencesKey("udp_stream_host"),
+            "192.168.1.100",
+        )
+        val UDP_STREAM_PORT = Pair(
+            intPreferencesKey("udp_stream_port"),
+            1234,
+        )
     }
 
     @Parcelize
@@ -371,6 +385,11 @@ class AppSettings(context: Context): Settings(context, "AppSettings") {
         val lastUpdateCheckAt: Long,
         val clearLogsOnExit: Boolean,
         val hideDeviceLogs: Boolean,
+
+        // UDP 推流
+        val udpStreamEnabled: Boolean,
+        val udpStreamHost: String,
+        val udpStreamPort: Int,
     ): Parcelable {
     }
 
@@ -437,6 +456,11 @@ class AppSettings(context: Context): Settings(context, "AppSettings") {
         bundleField(LAST_UPDATE_CHECK_AT) { it.lastUpdateCheckAt },
         bundleField(CLEAR_LOGS_ON_EXIT) { it.clearLogsOnExit },
         bundleField(HIDE_DEVICE_LOGS) { it.hideDeviceLogs },
+
+        // UDP 推流
+        bundleField(UDP_STREAM_ENABLED) { it.udpStreamEnabled },
+        bundleField(UDP_STREAM_HOST) { it.udpStreamHost },
+        bundleField(UDP_STREAM_PORT) { it.udpStreamPort },
     )
 
     val bundleState: StateFlow<Bundle> = createBundleState(::bundleFromPreferences)
@@ -507,6 +531,11 @@ class AppSettings(context: Context): Settings(context, "AppSettings") {
         lastUpdateCheckAt = preferences.read(LAST_UPDATE_CHECK_AT),
         clearLogsOnExit = preferences.read(CLEAR_LOGS_ON_EXIT),
         hideDeviceLogs = preferences.read(HIDE_DEVICE_LOGS),
+
+        // UDP 推流
+        udpStreamEnabled = preferences.read(UDP_STREAM_ENABLED),
+        udpStreamHost = preferences.read(UDP_STREAM_HOST),
+        udpStreamPort = preferences.read(UDP_STREAM_PORT),
     )
 
     suspend fun loadBundle() = loadBundle(::bundleFromPreferences)

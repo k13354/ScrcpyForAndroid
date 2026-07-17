@@ -111,6 +111,9 @@ class Scrcpy(
     @Volatile
     private var aacRecorder: NativeAacRecorder? = null
 
+    @Volatile
+    private var udpRecorder: UdpStreamRecorder? = null
+
     val listings = Listings()
 
     companion object {
@@ -287,6 +290,23 @@ class Scrcpy(
                 Log.i(TAG, "start(): recording -> ${recordFile.absolutePath}")
             }
 
+            // Setup UDP stream recorder (if enabled)
+            udpRecorder?.release()
+            udpRecorder = null
+            if (options.udpStreamEnabled && options.udpStreamHost.isNotBlank() && options.udpStreamPort > 0) {
+                Log.i(TAG, "start(): UDP stream -> ${options.udpStreamHost}:${options.udpStreamPort}")
+                val udpRec = UdpStreamRecorder(
+                    targetHost = options.udpStreamHost,
+                    targetPort = options.udpStreamPort,
+                    videoBitRate = options.videoBitRate.takeIf { it > 0 } ?: 8_000_000,
+                )
+                udpRecorder = udpRec
+                udpRec.start()
+                session.attachVideoConsumer { packet ->
+                    udpRec.feedPacket(packet.data, packet.ptsUs, packet.isConfig)
+                }
+            }
+
             Log.i(
                 TAG,
                 "start(): Session started successfully - device=${info.deviceName}, " +
@@ -312,6 +332,8 @@ class Scrcpy(
             wavRecorder = null
             runCatching { aacRecorder?.release() }
             aacRecorder = null
+            runCatching { udpRecorder?.release() }
+            udpRecorder = null
             isRunning = false
             flexDisplay = false
             _currentSessionState.value = null
@@ -337,6 +359,8 @@ class Scrcpy(
             wavRecorder = null
             aacRecorder?.release()
             aacRecorder = null
+            udpRecorder?.release()
+            udpRecorder = null
             NativeCoreFacade.onScrcpySessionStopped()
             session.stop()
             audioPlayer?.release()

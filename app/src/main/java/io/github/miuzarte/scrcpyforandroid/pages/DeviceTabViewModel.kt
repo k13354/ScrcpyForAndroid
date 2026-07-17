@@ -566,7 +566,23 @@ internal class DeviceTabViewModel(
             ?.takeIf { it.isNotBlank() }
             ?.let { options.copy(startApp = it) }
             ?: options
-        val session = scrcpy.start(resolvedOptions)
+
+        // 注入 UDP 推流配置
+        val asBundleValue = _asBundle.value
+        val finalOptions = if (asBundleValue.udpStreamEnabled &&
+            asBundleValue.udpStreamHost.isNotBlank() &&
+            asBundleValue.udpStreamPort > 0
+        ) {
+            resolvedOptions.copy(
+                udpStreamEnabled = true,
+                udpStreamHost = asBundleValue.udpStreamHost,
+                udpStreamPort = asBundleValue.udpStreamPort,
+            )
+        } else {
+            resolvedOptions
+        }
+
+        val session = scrcpy.start(finalOptions)
         _pendingScrollToPreview.value = resolvedOptions.video && resolvedOptions.videoPlayback
 
         if (resolvedOptions.startApp.isNotBlank() && resolvedOptions.control) {
