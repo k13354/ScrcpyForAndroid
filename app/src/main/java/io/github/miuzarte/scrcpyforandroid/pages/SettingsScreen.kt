@@ -24,6 +24,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.sp
 import androidx.core.net.toUri
 import io.github.miuzarte.scrcpyforandroid.BuildConfig
 import io.github.miuzarte.scrcpyforandroid.LockscreenPasswordActivity
@@ -595,53 +596,66 @@ fun SettingsPage(
 
                 AnimatedVisibility(asBundle.udpStreamEnabled) {
                     Column {
-                        SuperTextField(
-                            title = "目标 IP 地址",
-                            summary = "OBS 所在机器的 IP 地址",
-                            value = udpHostInput,
-                            onValueChange = { udpHostInput = it },
-                            onFocusLost = {
-                                asBundle = asBundle.copy(
-                                    udpStreamHost = udpHostInput.ifBlank { "192.168.1.100" },
-                                )
-                            },
-                            inputFilter = { it },
-                            singleLine = true,
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                        SuperTextField(
-                            title = "目标端口",
-                            summary = "OBS UDP 源监听的端口号",
-                            value = udpPortInput,
-                            onValueChange = { udpPortInput = it },
-                            onFocusLost = {
-                                asBundle = asBundle.copy(
-                                    udpStreamPort = udpPortInput.toIntOrNull()?.coerceIn(1024, 65535) ?: 1234,
-                                )
-                            },
-                            inputFilter = { it.filter(Char::isDigit) },
-                            singleLine = true,
-                            modifier = Modifier.fillMaxWidth(),
-                        )
-                        // 提示信息
-                        androidx.compose.foundation.layout.PaddingValues(
-                            start = UiSpacing.medium,
-                            top = UiSpacing.small,
-                            end = UiSpacing.medium,
-                            bottom = UiSpacing.small,
-                        ).also { padding ->
-                            androidx.compose.foundation.layout.Box(
-                                modifier = Modifier.padding(padding),
-                            ) {
-                                androidx.compose.material3.Text(
-                                    text = "OBS 配置：添加「UDP 源」插件，监听端口填写 ${udpPortInput.ifBlank { "1234" }}，格式选择 MPEG-TS",
-                                    style = androidx.compose.ui.text.TextStyle(
-                                        color = colorScheme.onSurfaceVariant,
-                                        fontSize = androidx.compose.ui.unit.TextUnit.Companion.Sp(11f),
-                                    ),
-                                )
-                            }
+                        androidx.compose.foundation.layout.Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = UiSpacing.CardTitle, vertical = UiSpacing.Small),
+                        ) {
+                            androidx.compose.material3.Text(
+                                text = "目标 IP 地址",
+                                style = textStyles.body2,
+                                color = colorScheme.onSurfaceVariantActions,
+                            )
+                            SuperTextField(
+                                label = "OBS 所在机器的 IP 地址",
+                                value = udpHostInput,
+                                onValueChange = { udpHostInput = it },
+                                onFocusLost = {
+                                    asBundle = asBundle.copy(
+                                        udpStreamHost = udpHostInput.ifBlank { "192.168.1.100" },
+                                    )
+                                },
+                                singleLine = true,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
                         }
+                        androidx.compose.foundation.layout.Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = UiSpacing.CardTitle, vertical = UiSpacing.Small),
+                        ) {
+                            androidx.compose.material3.Text(
+                                text = "目标端口",
+                                style = textStyles.body2,
+                                color = colorScheme.onSurfaceVariantActions,
+                            )
+                            SuperTextField(
+                                label = "OBS UDP 源监听的端口号",
+                                value = udpPortInput,
+                                onValueChange = { udpPortInput = it },
+                                onFocusLost = {
+                                    asBundle = asBundle.copy(
+                                        udpStreamPort = udpPortInput.toIntOrNull()?.coerceIn(1024, 65535) ?: 1234,
+                                    )
+                                },
+                                singleLine = true,
+                                modifier = Modifier.fillMaxWidth(),
+                            )
+                        }
+                        // 提示信息
+                        androidx.compose.material3.Text(
+                            text = "OBS 配置：添加「UDP 源」插件，监听端口填写 ${udpPortInput.ifBlank { "1234" }}，格式选择 MPEG-TS",
+                            style = textStyles.body2.copy(
+                                color = colorScheme.onSurfaceVariantSummary,
+                                fontSize = 11.sp,
+                            ),
+                            modifier = Modifier.padding(
+                                start = UiSpacing.CardTitle,
+                                top = UiSpacing.Small,
+                                end = UiSpacing.CardTitle,
+                                bottom = UiSpacing.Small,
+                            ),
+                        )
                     }
                 }
             }
